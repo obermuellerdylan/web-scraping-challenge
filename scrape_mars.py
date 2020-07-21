@@ -6,6 +6,7 @@ import requests
 import pymongo
 import datetime as dt
 import re
+import time
 
 def init_browser():
     executable_path = {'executable_path': 'chromedriver.exe'}
@@ -35,9 +36,9 @@ def mars_news():
     mars_url = 'https://mars.nasa.gov/news/?page=0&per_page=40&order=publish_date+desc%2Ccreated_at+desc&search=&category=19%2C165%2C184%2C204&blank_scope=Latest'
     browser.visit(mars_url)
 
+    time.sleep(10)
     html = browser.html
     soup = BeautifulSoup(html, 'html.parser')
-    browser.is_element_present_by_css(class_='list_text', wait_time=200)
     
     news_list=[]
     class_title = soup.find(class_='list_text')
@@ -56,11 +57,15 @@ def mars_weather():
 
     twitter_url = 'https://twitter.com/marswxreport?lang=en'
     browser.visit(twitter_url)
-
+    
+    
     html = browser.html
     soup = BeautifulSoup(html, 'html.parser')
-
-    browser.is_text_present('InSight', wait_time=10)
+    
+    browser.is_text_not_present('InSight', wait_time=10)
+    html = browser.html
+    soup = BeautifulSoup(html, 'html.parser')
+    
     tweet = soup.find('span', text=re.compile("InSight")).text.strip()
     #print(tweet)
     browser.quit()
@@ -105,16 +110,16 @@ def mars_images():
         browser.back()
     
     browser.quit()
-    return hemisphere_dict
+    return hemisphere_list
 
 def scrape():
     mars = {}
-    
+    mars['mars_news'] = mars_news()
     mars['space_images'] = space_images()
     mars['mars_weather'] = mars_weather()
     mars['mars_facts'] = mars_facts()
     mars['mars_images'] = mars_images()
-    mars['mars_news'] = mars_news()
+    
     return mars
 
 
